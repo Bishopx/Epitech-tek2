@@ -1,0 +1,49 @@
+@charset "UTF-8";
+
+p {
+	font-size: 20px;
+}
+
+.body {
+	background-color: #038E71;
+	text-align: center;
+	color: white;
+}
+
+.uppage {
+	margin-bottom: 10%;
+}
+
+.logo {
+	width: 20%;
+	height: auto;
+}
+
+.sep {
+	border-top: 1px solid white;
+}
+
+.under {
+	margin-top: -6%;
+	margin-bottom: 10%;
+}
+
+.fonc, .more {
+	margin: 5% 0%;
+}
+.space {
+	margin-top: 100px;
+}
+
+.phone {
+	width: 200px;
+}
+
+.description {
+	margin-top: 90px;
+}
+
+.footer {
+	background-color: white;
+	padding: 2% 0%; 
+}

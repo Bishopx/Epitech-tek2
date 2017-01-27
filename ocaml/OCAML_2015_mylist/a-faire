@@ -1,0 +1,73 @@
+assoc : 
+
+====> Test: assoc string Sucre
+Execution (PID 26) started at 02/03/2016 15:45:31.404 +0000
+Execution (PID 26) completed at 02/03/2016 15:45:31.438 +0000
+----- PROGRAM OUTPUT (stdout) -----
+Not_found
+----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+Test failure: Expected on stdout: <^100g$>, got:<Not_found
+>
+
+
+exists true a la place de false : 
+
+==> Test suite: exists tests (mandatory to pitch)
+====> Test: exists on an empty list
+Execution (PID 27) started at 02/03/2016 15:45:31.439 +0000
+Execution (PID 27) completed at 02/03/2016 15:45:31.472 +0000
+----- PROGRAM OUTPUT (stdout) -----
+true----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+Test failure: Expected on stdout: <^false$>, got:<true>
+====> Test: exists strings is false
+Execution (PID 29) started at 02/03/2016 15:45:31.473 +0000
+Execution (PID 29) completed at 02/03/2016 15:45:31.507 +0000
+----- PROGRAM OUTPUT (stdout) -----
+true----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+Test failure: Expected on stdout: <^false$>, got:<true>
+====> Test: exists strings is true
+Execution (PID 30) started at 02/03/2016 15:45:31.508 +0000
+Execution (PID 30) completed at 02/03/2016 15:45:31.544 +0000
+----- PROGRAM OUTPUT (stdout) -----
+true----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+PASSED
+
+
+mem_assoc false a la place de true : 
+
+====> Test: mem_assoc strings is false
+Execution (PID 55) started at 02/03/2016 15:45:32.42 +0000
+Execution (PID 55) completed at 02/03/2016 15:45:32.454 +0000
+----- PROGRAM OUTPUT (stdout) -----
+false----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+PASSED
+====> Test: mem_assoc strings is true
+Execution (PID 56) started at 02/03/2016 15:45:32.455 +0000
+Execution (PID 56) completed at 02/03/2016 15:45:32.493 +0000
+----- PROGRAM OUTPUT (stdout) -----
+false----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+Test failure: Expected on stdout: <^true$>, got:<false>
+
+
+remove assoc ne remove pas : 
+
+====> Test: remove_assoc in a list of ingredients
+Execution (PID 64) started at 02/03/2016 15:45:32.742 +0000
+Execution (PID 64) completed at 02/03/2016 15:45:32.777 +0000
+----- PROGRAM OUTPUT (stdout) -----
+Farine 200g Beurre 70g Vanille 1cf Sucre 100g ----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+Test failure: Expected on stdout: <^Farine 200g Beurre 70g Sucre 100g $>, got:<Farine 200g Beurre 70g Vanille 1cf Sucre 100g >
+====> Test: remove_assoc in an empty list
+Execution (PID 65) started at 02/03/2016 15:45:32.778 +0000
+Execution (PID 65) completed at 02/03/2016 15:45:32.823 +0000
+----- PROGRAM OUTPUT (stdout) -----
+Empty----- PROGRAM OUTPUT (stderr) -----
+------ END OF PROGRAM OUTPUT ------
+PASSED

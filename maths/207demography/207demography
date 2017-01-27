@@ -1,0 +1,116 @@
+#!/usr/bin/php
+<?php
+
+function readCsv() {
+	return array_map('str_getcsv', file('207demography_data.csv'));
+}
+
+function checkArg($countries, $arg) {
+	foreach ($countries as $country) {
+		$save = explode(";", $country[0]);
+		if (isset($save[1]) && strcmp($save[1], $arg) == 0)
+			return $save;
+	}
+	return null;
+}
+
+function checkAllArg($countries, $argv) {
+	$ret = array();
+	for ($i = 0; isset($argv[$i]); $i++) {
+		if (!($country = checkArg($countries, $argv[$i])))
+			return null;
+		array_push($ret, $country);
+	}
+	return $ret;
+}
+
+function error($countries, $argv) {
+	if (count($argv) < 1){
+		echo "usage: ./207demography code1 [...]\n";
+		exit(84);
+	}
+	if (($save = checkAllArg($countries, $argv)) == null) {
+		echo "We don't have this country in our database\n";
+		exit(84);
+	}
+	return $save;
+}
+
+function affCountries($countries) {
+	$save = "";
+	for ($i = 0; isset($countries[$i]); $i++) {
+		$save .= $countries[$i][0];
+		if ($i != count($countries) - 1)
+			$save .= ", ";
+	}
+	echo "country: " . $save . "\n";
+}
+
+function getMean($countries) {
+	$mean = array();
+	for ($i = 2; $i < 53; $i++) {
+		$tmp = 0.0;
+		foreach ($countries as $country) {
+			if (isset($country[$i]))
+				$tmp += floatval($country[$i]);
+		}
+		array_push($mean, $tmp / 1000000);
+	}
+	return $mean;
+}
+
+function fitOne($mean, $a, $b) {
+	echo "fit 1\n";
+	echo "\tY = " . number_format($b, 2, ".", "") . " X " . ($a < 0 ? "- " : "+ ") . number_format(abs($a), 2, ".", "") . "\n";
+	$deviation = 0.0;
+	for ($i = 0.0; isset($mean[$i]); $i+= 1.0) {
+		$fx = $a + ($b * (1961.0 + $i));
+		$deviation += pow($mean[$i] - $fx, 2);
+	}
+	$deviation = sqrt($deviation / 51.0);
+	echo "\tstandard deviation:\t" . number_format($deviation, 2, ".", "") . "\n";
+	echo "\tpopulation in 2050:\t" . number_format($a + $b * 2050, 2, ".", "") . "\n";
+	return $deviation;
+}
+
+function fitTwo($mean, $a, $b) {
+	echo "fit 2\n";
+	echo "\tX = " . number_format($b, 2, ".", "") . " Y " . ($a < 0 ? "- " : "+ ") . number_format(abs($a), 2, ".", "") . "\n";
+	$deviation = 0.0;
+	for ($i = 0.0; isset($mean[$i]); $i+= 1.0) {
+		$fx = (-$a / $b) + (1.0 / $b) * (1961.0 + $i);
+		$deviation += pow($mean[$i] - $fx, 2);
+	}
+	$deviation = sqrt($deviation / 51.0);
+	echo "\tstandard deviation:\t" . number_format($deviation, 2, ".", "") . "\n";
+	echo "\tpopulation in 2050:\t" . number_format((-$a / $b) + (1.0 / $b) * (2050.0), 2, ".", "") . "\n";
+	return $deviation;
+}
+
+function getAB($mean) {
+	$sY = array_sum($mean);
+	$sX = 0.0;
+	$sXY = 0.0;
+	$sX2 = 0.0;
+	$sY2 = 0.0;
+	for ($i = 0.0; isset($mean[$i]); $i+= 1.0) {
+		$year = 1961.0 + $i;
+		$sX += $year;
+		$sX2 += pow($year, 2.0);
+		$sY2 += pow($mean[$i], 2.0);
+		$sXY += $year * $mean[$i];
+	}
+	$aX = ($sY * $sX2 - $sX * $sXY) / (51.0 * $sX2 - pow($sX, 2));
+	$bX = (51.0 * $sXY - $sX * $sY) / (51.0 * $sX2 - pow($sX, 2));
+	$aY = ($sX * $sY2 - $sY * $sXY) / (51.0 * $sY2 - pow($sY, 2));
+	$bY = (51.0 * $sXY - $sX * $sY) / (51.0 * $sY2 - pow($sY, 2));
+	echo "correlation: " . number_format(fitOne($mean, $aX, $bX) / fitTwo($mean, $aY, $bY), 4, ".", "") . "\n";
+}
+
+array_shift($argv);
+$countries = readCsv();
+$countries = error($countries, $argv);
+affCountries($countries);
+$mean = getMean($countries);
+getAB($mean);
+exit(0);

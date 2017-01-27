@@ -1,0 +1,9 @@
+#include "Soldier.hh"
+
+void 	Soldier::isMadness() const {
+	std::cout << "MADNESS??? THIS IS KOALA!!!" << std::endl;
+}
+
+int main() {
+	return 0;
+}

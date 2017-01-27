@@ -1,0 +1,40 @@
+#!/usr/bin/php
+<?php
+
+function error($argv) {
+	if (count($argv) != 3){
+		echo "usage: ./209poll pSize sSize p\n";
+		exit(84);
+	}
+	foreach ($argv as $av) {
+		if (!is_numeric($av)) {
+			echo "All arguments have to be numbers\n";
+			exit(84);
+		}
+		if ($av < 0) {
+			echo "All arguments have to be positiv\n";
+			exit(84);
+		}
+	}
+}
+
+function variance($argv) {
+	$prob = $argv[2] / 100.0;
+	$v = (($prob * (1-$prob)) / $argv[1] * ($argv[0] - $argv[1]) / ($argv[0] - 1.0));
+	return $v;
+}
+
+function display($argv) {
+	$v = variance($argv);
+	echo "population size:\t\t" . $argv[0] . "\n";
+	echo "sample size:\t\t\t" . $argv[1] . "\n";
+	echo "voting intentions:\t\t" . $argv[2] . "%\n";
+	echo "variance:\t\t\t" . number_format($v, 6, ".", "") . "\n";
+	echo "95% confidence interval:\t[" . number_format($argv[2] - (1.96 * sqrt($v) * 100), 2, ".", "") . "% ; " . number_format((1.96 * sqrt($v) * 100) + $argv[2], 2, ".", "") . "%]\n";
+	echo "99% confidence interval:\t[" . number_format($argv[2] - (2.58 * sqrt($v) * 100), 2, ".", "") . "% ; " . number_format((2.58 * sqrt($v) * 100) + $argv[2], 2, ".", "") . "%]\n";
+}
+
+array_shift($argv);
+error($argv);
+display($argv);
+exit(0);

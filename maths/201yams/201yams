@@ -1,0 +1,159 @@
+#!/usr/bin/php
+<?php
+
+function fact($n) {
+	if ($n == 0)
+		return 1;
+	else
+		return $n * fact($n - 1);
+}
+
+function count_straight($numbers, $type) {
+	$dices = array_count_values($numbers);
+	$type_number = $type[1];
+	$n = 0;
+	foreach ($dices as $dice => $number) {
+		if ($type_number == 6 && $dice == 1)
+			$n++;
+		elseif ($type_number == 5 && $dice == 6)
+			$n++;
+		else
+			$n += $number - 1;
+	}
+	return $n;
+}
+
+function comb($a, $b) {
+	return fact($a) / (fact($b) * fact($a - $b));
+}
+
+function bin($a, $b) {
+	$bin = comb($a, $b) * pow(1/6, $b) * pow(5/6, $a-$b);
+	return $bin;
+}
+
+function calcProb($type, $n) {
+	$result = 0;
+	if ($n >= $type)
+		$result = 1;
+	else {
+		for ($i = $type - $n; $i <= 5 - $n; $i++)
+			$result += bin(5 - $n, $i);
+	}
+	return $result;	
+}
+
+function yams($n) {
+ 	$result = calcProb(5, $n);
+ 	return $result;
+}
+
+function four($n) {
+	$result = calcProb(4, $n);
+	return $result;	
+}
+
+
+function brolan($n) {
+	$result = calcProb(3, $n);
+	return $result;	
+}
+	
+
+function pair($n) {
+	$result = calcProb(2, $n);
+	return $result;	
+}
+
+function full($three, $pair) {
+	$result = comb(5 - $three - $pair, 3 - $three) * pow(1/6, 5 - $three - $pair);
+	return $result;
+}
+
+function straight($n) {
+ $result = fact($n) / pow(6, $n);
+ return $result;
+}
+
+function error($numbers, $type) {
+	$list = array("pair", "three", "four", "full", "straight", "yams");
+	$bool = false;
+	if ($numbers[0] == 0) {
+		foreach ($numbers as $number) {
+			if ($number != 0) {
+				echo "Bad first roll of dice, you can't have a value asigned to a dice\n";
+				exit(84);
+			}
+		}
+	}
+	foreach ($numbers as $number)
+		if (!is_numeric($number) || ($number > 6 || $number < 0)){
+			echo "Bad numbers combinaison\n",
+			exit(84);
+		}
+	foreach ($list as $l) {
+		if ($l == $type[0])
+			$bool = true;
+	}
+	if (!$bool){
+		echo "Bad expected combinaison\n";
+		exit(84);
+	}
+	if (!$type[1]){
+		echo "Bad type synthace [type_number]\n";
+		exit(84);
+	}
+	if ($type[0] == "straight" && ($type[1] != 5 && $type[1] != 6)) {
+		echo "A straight can only be of 5 or 6\n";
+		exit(84);
+	}
+	if ($type[1] > 6 || $type[1] < 0) {
+		echo "Bad number to find [0 <= number <= 6]\n";
+		exit(84);
+	}
+}
+
+function display($type, $count, $nb, $nb2 = null) {
+	if ($nb2)
+		echo "chances to get a " . $nb . " full of " . $nb2 . ": " .  $count . "%\n";
+	else
+		echo "chances to get a " . $nb . " " . $type . ": " .  $count . "%\n";		
+}
+
+array_shift($argv);
+if (count($argv) != 6){
+	echo "usage: ./201yams [number x 5] [type_number]\n";
+	exit(84);
+}
+$types = array_pop($argv);
+$numbers = $argv;
+$type = split("_", $types);
+error($numbers, $type);
+if ($type[0] == "full") {
+	if (count($type) != 3) {
+		echo "usage: ./201yams [number x 5] [type_number]\n";
+		exit(84);
+	}
+	$count_full_first = count(array_keys($numbers, $type[1]));
+	$count_full_second = count(array_keys($numbers, $type[2]));
+	display($type[0], round(full($count_full_first, $count_full_second), 4) * 100, $type[1], $type[2]);	
+} else {
+	if (count($type) != 2){
+		echo "usage: ./201yams [number x 5] [type_number]\n";
+		exit(84);
+	}
+	$count = count(array_keys($numbers, end($type)));
+	if ($type[0] == "yams")	
+		display($type[0], number_format(round(yams($count), 4) * 100, 2), $type[1]);
+	if ($type[0] == "four")
+		display("four-of-a-kind", number_format(round(four($count), 4) * 100, 2), $type[1]);
+	if ($type[0] == "three")
+		display("three-of-a-kind", number_format(round(brolan($count), 4) * 100, 2), $type[1]);
+	if ($type[0] == "pair")
+		display($type[0], number_format(round(pair($count), 4) * 100, 2) , $type[1]);
+	if ($type[0] == "straight") {
+		$n = count_straight($numbers, $type);
+		display($type[0], number_format(round(straight($n), 4) * 100, 2), $type[1]);		
+	}
+}
+exit(0);

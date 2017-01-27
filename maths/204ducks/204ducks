@@ -1,0 +1,105 @@
+#!/usr/bin/php
+<?php
+
+function fonction($a, $t) {
+	return ($a * exp(-$t)) + (4 - 3*$a)*exp(-2*$t) + (2*$a-4)*exp(-4*$t);
+}
+
+function simpson($a) {
+	$ret2 = 0.0;
+	$ret1 = 0.0;
+	$ret = 0;
+
+	for ($t = 0.000; $t < 10.0; $t+= 0.00001)
+		$ret1 += $t * fonction($a, $t);
+	for ($t = 0.001; $t < 10.0; $t+= 0.00001)
+		$ret2 += $t * fonction($a, $t);
+	$ret = (($ret1 * 4.0) + ($ret2 * 2.0) + fonction($a, 0.0) + fonction($a, 10.0)) * (10.0 / (6.0 * 1000000.0));
+	return $ret;
+}
+
+function variance($a, $simpson) {
+	$ret1 = 0.0;
+	$ret2 = 0.0;
+	for ($t = 0.0; $t < 25; $t+=0.001)
+		$ret1 += pow($t - $simpson, 2) * fonction($a, $t);
+	for ($t = 0.001; $t < 25; $t+=0.001)
+		$ret2 += pow($t - $simpson, 2) * fonction($a, $t);
+	$res = (($ret1 * 4) + ($ret2 * 2) + fonction($a, 0) + fonction($a, 10)) * (25 / (6 * 25000));
+	return $res;
+}
+
+function aff_time($ret) {
+	$dec = number_format(floor($ret));
+	$fl = ($ret - $dec) * 60;
+	echo $dec . "m ";
+	if ($fl < 10)
+		echo "0";
+	echo number_format(ceil($fl)) . "s";
+}
+
+function time_elapse($a) {
+	$result = 0;
+	$t1 = 0;
+	$t2 = 0;
+	for ($t = 0; $t < 10; $t += 0.00001) {
+		$result += fonction($a, $t);
+		if ($result >= 50000 && $t1 == 0)
+			$t1 = $t;
+		if ($result >= 99000 && $t2 == 0)
+			$t2 = $t;
+	}
+	echo "time after which 50% of the ducks are back: ";
+	aff_time($t1);
+	echo "\n";
+	echo "time after which 99% of the ducks are back: ";
+	aff_time($t2);
+	echo "\n";
+}
+
+function number_ducks($a) {
+	$result = 0;
+	$t1 = -1;
+	$t2 = -1;
+	for ($t = 0; $t <= 10; $t+=0.00001) {
+		$result += fonction($a, $t);
+		if ((int)$t == 1 && $t1 == -1)
+			$t1 = $result;
+		if ((int)$t == 2 && $t2 == -1)
+			$t2 = $result;
+	}
+	echo "percentage of ducks back after 1 minute: " . number_format($t1 / 1000, 1) . "%\n";
+	echo "percentage of ducks back after 2 minutes: " . number_format($t2 / 1000, 1) . "%\n";
+}
+
+
+function error($argv) {
+	if (count($argv) != 1){
+		echo "usage: ./204ducks a\n";
+		exit(84);
+	}
+	if (!is_numeric($argv[0])) {
+		echo "Argument has to be a number\n";
+		exit(84);
+	}
+	if (floatval($argv[0]) < 0 || floatval($argv[0]) > 2.5) {
+		echo "Argument hs to be a number between 0 and 2.5\n";
+		exit(84);
+	}
+}
+
+if (count($argv) != 2) {
+	echo "usage: ./204ducks a\n";
+	exit(84);
+}
+array_shift($argv);
+error($argv);
+if (count($argv) == 1) {
+	$esp = simpson(floatval($argv[0]));
+	echo "mean return time: ";
+	aff_time($esp);
+	echo "\n";
+	echo "standard deviation: " . number_format(sqrt(variance(floatval($argv[0]), $esp)), 3) . "\n";
+	time_elapse(floatval($argv[0]));
+	number_ducks(floatval($argv[0]));	
+}

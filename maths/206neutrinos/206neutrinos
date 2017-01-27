@@ -1,0 +1,75 @@
+#!/usr/bin/php
+<?php
+
+function error($argv) {
+	if (count($argv) != 4){
+		echo "usage: ./206neutrinos n a h sd\n";
+		exit(84);
+	}
+	for ($i = 0; $i < count($argv); $i++) {
+		if (!is_numeric($argv[$i])) {
+			echo "Arguments have to be numbers\n";
+			exit(84);
+		}
+		if (intval($argv[$i]) <= 0) {
+			echo "Arguments have to be positive numbers\n";
+			exit(84);
+		}
+	}
+}
+
+/**
+* 
+*/
+class Mean
+{
+	var	$esp;
+	var $stand;
+	var $ari;
+	var $quad;
+	var $harm;
+
+	function __construct($argv)
+	{
+		$this->esp = floatval($argv[0]);
+		$this->ari = floatval($argv[1]);
+		$this->harm = floatval($argv[2]);
+		$this->stand = floatval($argv[3]);
+		$this->quad = floatval("0");
+	}
+
+	function writeResult() {
+		echo "\tantal mãlinder:\t\t" . $this->esp . "\n";
+		echo "\tstandardafvigelse:\t" . number_format($this->stand, 2, ".", "") . "\n"; 
+		echo "\taritmetisk gennemsnit:\t" . number_format($this->ari, 2, ".", "") . "\n"; 
+		echo "\tkvadratisk gennemsnit:\t" . number_format($this->quad, 2, ".", "") . "\n"; 
+		echo "\tharmonisk gennemsnit:\t" . number_format($this->harm, 2, ".", "") . "\n"; 
+	}
+
+	function calc($input) {
+		$mean = $this->ari * $this->esp;
+		$meanPow = (pow($this->stand, 2) + pow($this->ari, 2)) * $this->esp;
+		$this->esp++;
+
+		$this->ari = ($mean + $input) / $this->esp;
+		$this->stand = sqrt((($meanPow + pow($input, 2)) / $this->esp) - pow($this->ari, 2));
+		$this->quad = sqrt(($meanPow + pow($input, 2)) / $this->esp);
+		$this->harm = $this->esp / ((1 / $input) + (($this->esp - 1) / $this->harm));
+	}
+}
+
+function main($argv) {
+	array_shift($argv);
+	error($argv);
+	$mean = new Mean($argv);
+	echo("indtast din vaerdi: ");
+	while (($value = readline()) != "ENDE") {
+		if (is_numeric($value)) {
+			$mean->calc(floatval($value));
+			$mean->writeResult();
+		}
+		echo("indtast din vaerdi: ");
+	}
+}
+
+main($argv);

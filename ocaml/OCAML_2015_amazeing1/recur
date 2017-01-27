@@ -1,0 +1,27 @@
+int open(maze, x, y)
+while(openwall < stop)
+{
+	case.x random %x
+	case.y random %y
+	case.wall random %4
+	if (open_wall -> succes)
+		++openwall;
+}
+
+int 	maze_gen(maze, x, y, int open, int stop)
+{
+
+	if (open >= stop)
+		return maze;
+	else {
+
+		if (openwall(maze, maze[0], x, y))
+			maze_gen(maze, x, y, open + 1)
+		else
+			maze_gen(maze, x, y, open)
+	}
+}
+
+let maze_gen maze x y open stop = match open with
+	|
+	|

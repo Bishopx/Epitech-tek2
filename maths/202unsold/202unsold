@@ -1,0 +1,161 @@
+#!/usr/bin/php
+<?php
+
+function probXY($a, $b, $x, $y) {
+	return ((($a - $x)*($b - $y)) / ((5*$a - 150)*(5*$b - 150)));
+}
+
+function probZ($law, $number) {
+	if ($number <= 60) {
+		$j = $number / 10 - 2;
+		$i = 0;		
+	}
+	else {
+		$i = ($number - 50) / 10 - 1;
+		$j = 4;
+	}
+	$save = $j;
+	$result = 0;
+	while ($i <= $save && $j >= 0) {
+		$result += $law[$i][$j];
+		$j--;
+		$i++;
+	}
+	return $result;
+}
+
+function XLaw($law) {
+	$save = 0;
+
+	echo "X law ";
+	for ($i = 0; $i < 5; $i++) {
+		for ($j = 0; $j < 5; $j++) {
+			$save += $law[$j][$i];
+		}
+		echo number_format($save, 3) . " ";
+		$esperanceX[$i] = $save;
+		$save = 0;
+	}
+	echo "1\n";
+	return $esperanceX;
+}
+
+function esperance($esperance, $price, $limit) {
+	$result = 0;
+	for ($i = 0; $i < $limit; $i++) {
+		$result += $price * $esperance[$i];
+		$price += 10;
+	}
+	return $result;
+}
+
+function esperencaPow($esperance, $price, $limit) {
+	$result = 0;
+	for ($i = 0; $i < $limit; $i++) {
+		$result += pow($price, 2) * $esperance[$i];
+		$price += 10;
+	}
+	return $result;	
+}
+
+function display_sep() {
+	for ($i = 0; $i < 42; $i++) {
+		echo "-";
+	}	
+	echo "\n";	
+}
+
+function display_base() {
+	for ($i = 0; $i < 6; $i++)
+		echo " ";
+	for ($x = 10; $x <= 50; $x+= 10) {
+		echo "X=" . $x . "  ";
+	}
+	echo "Y law\n";
+}
+
+function display_xy($numbers) {
+	$x = 10;
+	$save = 0;
+	$i = 0;
+	$j = 0;
+	$y = 10;
+	while ($y <= 50) {
+		echo "Y=" . $y . "  ";
+		while ($x <= 50) {
+			$prob = probXY($numbers[0], $numbers[1], $x, $y);
+			$save += $prob;
+			$law[$i][$j] = $prob;
+			echo number_format($prob, 3) . " ";
+			$x += 10;
+			$j++;			
+		}
+		$esperanceY[$i] = $save;
+		echo number_format(round($save, 4), 3) ."\n";
+		$i++;
+		$j = 0;
+		$save = 0;
+		$x = 10;
+		$y += 10;
+	}
+	return array($law, $esperanceY);
+}
+
+function display_z($law) {
+	$index = 0;
+	echo "z      ";
+	for($z = 20; $z <= 100; $z +=10) {
+		echo $z . "     ";
+	}
+	echo "total\n";
+	echo "p(Z=z) ";
+	for ($i = 20; $i <= 100; $i += 10) {
+		echo number_format(round($save[$index] = probZ($law, $i), 4), 3) . "  ";
+		$index++;
+	}
+	echo " 1\n";
+	return ($save);
+}
+
+function main($numbers) {
+
+	display_sep();
+	display_base();
+	$save = display_xy($numbers);
+	$law = $save[0];
+	$esperanceY = $save[1];
+	$esperanceX = XLaw($law);
+	display_sep();
+	$esperanceZ = display_z($law);
+	display_sep();
+	echo "expected value of X: " . number_format(round(esperance($esperanceX, 10, 5), 4), 1) . "\n";
+	echo "variance of X: " . number_format(round(esperencaPow($esperanceX, 10, 5) - pow(esperance($esperanceX, 10, 5), 2), 4), 1) . "\n";
+	echo "expected value of Y: " . number_format(round(esperance($esperanceY, 10, 5), 4), 1) . "\n";
+	echo "variance of Y: " . number_format(round(esperencaPow($esperanceY, 10, 5) - pow(esperance($esperanceY, 10, 5), 2), 4), 1) . "\n";
+	echo "expected value of Z: " . number_format(round(esperance($esperanceZ, 20, 9), 4), 1) . "\n";
+	echo "variance of Z: " . number_format(round(esperencaPow($esperanceZ, 20, 9) - pow(esperance($esperanceZ, 20, 9), 2), 4), 1) . "\n";
+	display_sep();
+}
+
+function error($numbers) {
+	foreach ($numbers as $number) {
+		if (!is_numeric($number)) {
+			echo "Both arguments must be numbers\n";
+			exit(84);
+		}		
+		if ($number < 50) {
+			echo "Both number must be higher than 50\n";
+			exit(84);
+		}
+	}
+}
+
+array_shift($argv);
+if (count($argv) != 2){
+	echo "usage: ./202unsold [a] [b]\n";
+	exit(84);
+}
+$numbers = $argv;
+error($numbers);
+main($numbers);
+exit(0);

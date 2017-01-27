@@ -1,0 +1,96 @@
+#!/usr/bin/php
+<?php
+function microtime_float()
+{
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+}
+
+function fact($n) {
+	if ($n == 0)
+		return 1;
+	else
+		return bcmul($n, fact($n - 1));
+}
+
+function comb($a, $b) {
+	return bcdiv(fact($a), bcmul(fact($b), fact(bcsub($a, $b))));
+}
+
+function bin($b, $p) {
+	$bin = comb(3500, $b) * pow($p, $b) * pow(1 - $p, 3500-$b);
+	return $bin;
+}
+
+function DistribBin($time) {
+	$overload = 0;
+	$p = $time / 28800;
+	$time_start = microtime_float();
+	for ($i = 0; $i <= 50; $i++) {
+		echo $i;
+		if ($i < 10)
+			echo " ";
+		echo " -> " . number_format(bin($i, $p), 3) . "  ";
+		if (($i + 1) % 6 == 0)
+			echo "\n";
+		if ($i > 25)
+			$overload += bin($i, $p);
+	}
+	$time = microtime_float() - $time_start;
+	echo "\noverload: " . number_format($overload * 100, 1) . "%\n";
+	echo "computation time: " . number_format($time, 2) . " ms\n\n";
+}
+
+function DistribPoission($time) {
+	$overload = 0;
+	$p = $time / 28800;
+
+	$sym = 3500 * $p;
+	$time_start = microtime_float();
+	for ($i = 0; $i <= 50; $i++) {
+		echo $i;
+		if ($i < 10)
+			echo " ";
+		echo " -> " . number_format(exp(-$sym) * (pow($sym, $i) / fact($i)), 3) . "  ";
+		if (($i + 1) % 6 == 0)
+			echo "\n";
+		if ($i > 25)
+			$overload += exp(-$sym) * (pow($sym, $i) / fact($i));
+	}
+	$time = microtime_float() - $time_start;
+	echo "\noverload: " . number_format($overload * 100, 1) . "%\n";
+	echo "computation time: " . number_format($time, 2) . " ms\n\n";
+}
+
+function error($argv) {
+	if (count($argv) != 2 && count($argv) != 1){
+		echo "usage: ./203hotline [n k | d]\n";
+		exit(84);
+	}
+	if (count($argv) == 2) {
+		if (!is_numeric($argv[0]) || !is_numeric($argv[1])) {
+			echo "Both arguments have to be numbers\n";
+			exit(84);
+		}
+	}
+	if (count($argv) == 1) {
+		if (!is_numeric($argv[0])) {
+			echo "Argument has to be a number\n";
+			exit(84);
+		}
+	}	
+}
+
+array_shift($argv);
+error($argv);
+if (count($argv) == 2) {
+	$comb = comb($argv[0], $argv[1]);
+	echo $argv[1] . "-combination of a ". $argv[0] . " set:\n";
+	echo number_format($comb, 0, '', '') . "\n";	
+}
+if (count($argv) == 1) {
+	echo "Binomial distribution:\n";
+	DistribBin($argv[0]);
+	echo "Poisson distribution:\n";
+	DistribPoission($argv[0]);
+}

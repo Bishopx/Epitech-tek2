@@ -1,0 +1,188 @@
+#!/usr/bin/php
+<?php
+
+function error($argv) {
+	$res = 0;
+	if (count($argv) != 9){
+		echo "usage: ./208dowels O0 O1 O2 O3 O4 O5 O6 O7 O8+\n";
+		exit(84);
+	}
+	for ($i = 0; $i < count($argv); $i++) {
+		if (!is_numeric($argv[$i])) {
+			echo "All arguments must be numbers\n";
+			exit(84);
+		}
+		if (intval($argv[$i]) < 0) {
+			echo "All numbers have to be positiv\n";
+			exit(84);
+		}
+		$res += intval($argv[$i]);
+	}
+	if ($res != 100) {
+		echo "The sum of all arguments must be equal to 100\n";
+		exit(84);
+	}
+}
+
+function fact($n) {
+	if ($n == 0)
+		return 1;
+	else
+		return $n * fact($n - 1);
+}
+
+function comb($a, $b) {
+	return fact($a) / (fact($b) * fact($a - $b));
+}
+
+function calculate($x, $dis) {
+	$var = (100 * comb(100, $x) * pow($dis, $x) * pow((1 - $dis), 100 - $x));
+	return $var;
+}
+
+function getDistTable() {
+	$v = array(99, 90, 80, 70, 60, 50, 40, 30, 20, 10, 5, 2, 1);
+	$v1 = array(0.00, 0.02, 0.06, 0.15, 0.27, 0.45, 0.71, 1.07, 1.64, 2.71, 3.84, 5.41, 6.63);
+	$v2 = array(0.02, 0.21, 0.45, 0.71, 1.02, 1.39, 1.83, 2.41, 3.22, 4.61, 5.99, 7.82, 9.21);
+	$v3 = array(0.11, 0.58, 1.01, 1.42, 1.87, 2.37, 2.95, 3.66, 4.64, 6.25, 7.81, 9.84, 11.35);
+	$v4 = array(0.30, 1.06, 1.65, 2.19, 2.75, 3.36, 4.04, 4.88, 5.99, 7.78, 9.49, 11.67, 13.28);
+	$v5 = array(0.55, 1.61, 2.34, 3.00, 3.66, 4.35, 5.13, 6.06, 7.29, 9.24, 11.07, 13.33, 15.01);
+	$v6 = array(0.70, 2.20, 3.07, 3.83, 4.57, 5.35, 6.21, 7.23, 8.56, 10.64, 12.59, 15.03, 16.81);
+	$v7 = array(1.24, 2.83, 3.82, 4.67, 5.49, 6.35, 7.28, 8.38, 9.80, 12.02, 14.07, 16.62, 18.48);
+	$v8 = array(1.65, 3.49, 4.59, 5.53, 6.42, 7.34, 8.35, 9.52, 11.03, 13.36, 15.51, 18.17, 20.09);
+	$v9 = array(2.09, 4.17, 5.38, 6.39, 7.36, 8.34, 9.41, 10.66, 12.24, 14.68, 16.92, 19.63, 21.67);
+	$v10 = array(2.56, 4.87, 6.18, 7.27, 8.30, 9.34, 10.47, 11.78, 13.44, 15.99, 18.31, 21.16, 23.21);
+	$table = array($v, $v1, $v2, $v3, $v4, $v5, $v6, $v7, $v8, $v9, $v10);
+	return ($table);
+}
+
+function getDist($argv) {
+	$dis = 0.0;
+	for ($i = 0; $i < count($argv); $i++)
+		$dis += $i * $argv[$i];
+	return ($dis / 10000.0);
+}
+
+function getTx($argv, $dis) {
+	$ret = array();
+	$tmp = 0.0;
+	for ($i = 0; $i < count($argv); $i++) {
+		if (intval($argv[$i]) < 10) {
+			$save = 0;
+			$tmp = 0.0;
+			while ($save < 10) {
+				$save += intval($argv[$i]);
+				$tmp += calculate($i, $dis);
+				$i++;
+			}
+			$i-= 1;
+		} else
+			$tmp = calculate($i, $dis);
+		array_push($ret, $tmp);
+	}
+	$save = 0;
+	for ($i = 0; $i < count($ret) - 1; $i++)
+		$save += $ret[$i];
+	$ret[count($ret) - 1] = 100 - $save;
+	return $ret;
+}
+
+function displayBase($argv, $dis, $sep) {
+	$Ox = array();
+	$x = array();
+	$Tx = array();
+	$ret = array();
+	echo "\tx\t|" . $sep;
+	for ($i = 0; $i < count($argv); $i++) {
+		if (intval($argv[$i]) < 10) {
+			$bool = false;
+			$save = $i;
+			if (isset($argv[$i + 1]) && isset($argv[$i-1]))
+				$bool = (min($argv[$i - 1], $argv[$i+1]) == $argv[$i-1] ? true : false);
+			if ($bool) {
+				$tmp = $argv[$i-1] + $argv[$i];
+				$tmp2 = calculate(($i-1), $dis) + calculate($i, $dis);
+				array_pop($Ox);
+				array_pop($x);
+				array_pop($Tx);
+				array_push($Ox, $tmp);
+				array_push($x, ($i-1) . "-".($i));
+				array_push($Tx, $tmp2);
+			} else {
+				$tmp = 0;
+				$tmp2 = 0;		
+				while ($tmp < 10 && isset($argv[$i])) {
+					$tmp += intval($argv[$i]);
+					$tmp2 += calculate($i, $dis);
+					$i++;
+				}
+				$i--;
+				array_push($Ox, $tmp);
+				array_push($Tx, $tmp2);
+				if ($i == count($argv) - 1)
+					array_push($x, ($i - 1) . "+");
+				else {
+					array_push($x, $save . "-" . $i);
+				}
+			}
+		}	
+		else {
+			array_push($Ox, intval($argv[$i]));
+			array_push($Tx, calculate($i, $dis));
+			array_push($x, $i . ($i == 8 ? "+" : ""));			
+		}
+	}
+	array_pop($Tx);
+	array_push($Tx, 100 - array_sum($Tx));
+	for ($i = 0; $i < count($x); $i++)
+		echo $x[$i] . "\t|" . $sep;
+	echo "total\n\tOx\t|" . $sep;
+	for ($i = 0; $i < count($Ox); $i++) {
+		echo $Ox[$i] . "\t|" . $sep;
+	}
+	echo "100\n\tTx\t|" . $sep;
+	for ($i = 0; $i < count($Tx); $i++)
+		echo number_format($Tx[$i], 1, ".", "") . "\t|" . $sep;
+	echo "100\n";
+	echo "distribution:\t\t\tB(100, " . $dis . ")\n";
+	array_push($ret, $Ox);
+	array_push($ret, $Tx);
+	return $ret;
+}
+
+function sumSquare($ox, $tx) {
+	$res = 0;
+	for ($i = 0; $i < count($ox); $i++)
+		$res += pow(($ox[$i] - $tx[$i]), 2) / $tx[$i];
+	echo "sum of the square differences:\t". number_format($res, 3, ".", "") ."\n";
+	return $res;
+}
+
+function freedomDegree($ox) {
+	$v = count($ox) - 2;
+	echo "freedom degrees:\t\t" . $v . "\n";
+	return $v;
+}
+
+function getValidity($disTable, $v, $sum) {
+	$i = 0;
+	while ($i < count($disTable[$v+1]) && $disTable[$v][$i] <= $sum) {
+		$i++;
+	}
+	if (!isset($disTable[0][$i]))
+		echo "fit validity:\t\t\tP<" . $disTable[0][count($disTable[0]) - 1] . "%\n";
+	else if ($i == 0)
+		echo "fit validity:\t\t\tP>" . $disTable[0][$i] . "%\n";		
+	else
+		echo "fit validity:\t\t\t" . $disTable[0][$i] . "%<P<" . $disTable[0][$i-1] . "%\n";
+}
+
+array_shift($argv);
+error($argv);
+$dis = getDist($argv);
+$ret = displayBase($argv, $dis, " ");
+$sum = sumSquare($ret[0], $ret[1]);
+$v = freedomDegree($ret[0]);
+$disTable = getDistTable();
+getValidity($disTable, $v, $sum);
+exit(0);
